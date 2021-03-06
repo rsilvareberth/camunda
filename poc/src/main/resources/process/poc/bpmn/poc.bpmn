@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_18wz9va" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0">
+  <bpmn:process id="poc" name="poc" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_122kr5f</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_122kr5f" sourceRef="StartEvent_1" targetRef="first-delegate" />
+    <bpmn:endEvent id="Event_1hno1ek">
+      <bpmn:incoming>Flow_0j9rb8q</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_03m70jn" sourceRef="first-delegate" targetRef="Event_0gca3ga" />
+    <bpmn:serviceTask id="first-delegate" name="FirstDelegate" camunda:delegateExpression="${firstDelegate}">
+      <bpmn:incoming>Flow_122kr5f</bpmn:incoming>
+      <bpmn:outgoing>Flow_03m70jn</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0j9rb8q" sourceRef="Event_0gca3ga" targetRef="Event_1hno1ek" />
+    <bpmn:intermediateCatchEvent id="Event_0gca3ga">
+      <bpmn:incoming>Flow_03m70jn</bpmn:incoming>
+      <bpmn:outgoing>Flow_0j9rb8q</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0g814h4">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="poc">
+      <bpmndi:BPMNEdge id="Flow_03m70jn_di" bpmnElement="Flow_03m70jn">
+        <di:waypoint x="400" y="117" />
+        <di:waypoint x="472" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_122kr5f_di" bpmnElement="Flow_122kr5f">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="300" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0j9rb8q_di" bpmnElement="Flow_0j9rb8q">
+        <di:waypoint x="508" y="117" />
+        <di:waypoint x="562" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1hno1ek_di" bpmnElement="Event_1hno1ek">
+        <dc:Bounds x="562" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0315nsk_di" bpmnElement="first-delegate">
+        <dc:Bounds x="300" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1l5l821_di" bpmnElement="Event_0gca3ga">
+        <dc:Bounds x="472" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
