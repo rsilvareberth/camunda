@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <meta http-equiv="cache-control" content="max-age=0" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
+  <meta http-equiv="pragma" content="no-cache" />
+
+  <style type="text/css">
+    html, body, #canvas {
+      height: 100%;
+      padding: 0;
+    }
+    
+    .transaction-boundary {
+      background-color: rgba(180, 21, 21, 0.7);
+      border-radius: 1px;
+      min-height: 50px;
+      width: 3px;
+    }
+
+    .execution-listener {
+      background-color: rgba(21, 66, 180, 0.7);
+      color: White;
+      border-radius: 5px;
+      font-family: Arial;
+      font-size: 12px;
+      padding: 5px;
+      min-height: 16px;
+      min-width: 16px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
+      fill: rgba(66, 180, 21, 0.7) !important; /* color elements as green */
+    }
+    
+    .highlight-running .djs-visual > :nth-child(1) {
+    	fill: rgba(0, 198, 218, 0.7) !important; /* color still running flow nodes as blue */
+    }
+    
+    #info-box {
+   	  margin-left: 20px;
+      margin-top: 15px;
+      padding: 10px;
+      table-layout: fixed;
+      border-collapse: collapse;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      font-family: sans-serif;
+      line-height: 150%;
+      font-size: 80%;
+      z-index: 1000;
+      background-color: rgba(255,255,255,0.90);
+      border-radius: 10px;
+    }
+  </style>
+
+  <title>Process Test Coverage Report</title>
+</head>
+<body>
+
+  <div id="info-box">
+	<div>Process Definition Name: poc_process</div>
+	<div>Coverage: 71,4%</div>
+	<div>Test Class: wipdev.cloud.poc.ProcessTest</div>
+	
+  </div>
+  
+  <!-- element to draw bpmn diagram in -->
+  <div id="canvas"></div>
+
+  <!-- scripts -->
+
+  <!-- seed dependencies (required for demo only) -->
+  <script src="../bower_components/jquery/dist/jquery.js"></script>
+
+  <!-- bpmn-js viewer -->
+  <script src="../bower_components/bpmn-js/dist/bpmn-navigated-viewer.js"></script>
+
+  <!-- application -->
+  <script>
+    (function(NavigatedViewer, $) {
+
+      // create viewer
+      var bpmnViewer = new NavigatedViewer({
+        container: '#canvas'
+      });
+
+
+      // import function
+      function importXML(xml) {
+
+        // import diagram
+        bpmnViewer.importXML(xml, function(err) {
+
+          if (err) {
+            return console.error('could not import BPMN 2.0 diagram', err);
+          }
+
+          var canvas = bpmnViewer.get('canvas'),
+              overlays = bpmnViewer.get('overlays');
+
+
+          // zoom to fit full viewport
+          canvas.zoom('fit-viewport', true);
+
+      // visualizations          
+      elementRegistry = bpmnViewer.get('elementRegistry');
+      var elements = elementRegistry.getAll();
+      console.log(elements);
+      for (var i = 0; i < elements.length; i++) {
+        var element = elements[i];
+        if (element.type != 'label') {
+          
+          // Transaction Boundaries
+          if (element.businessObject.$attrs["camunda:asyncBefore"]
+                || element.businessObject.$attrs["camunda:async"]
+                || element.type == 'bpmn:ReceiveTask'
+                || element.type == 'bpmn:UserTask'
+                || element.type == 'bpmn:IntermediateCatchEvent'
+             ) {
+            overlays.add(element.id, 'note', {
+              position: {
+                bottom: (element.type == 'bpmn:IntermediateCatchEvent' ? 18 : 40),
+                left: -4
+              },
+              html: '<div class="transaction-boundary"></div>'
+            });
+          }
+          if (element.businessObject.$attrs["camunda:asyncAfter"]) {
+            overlays.add(element.id, 'note', {
+              position: {
+                bottom: 19,
+                right: -1
+              },
+              html: '<div class="transaction-boundary"></div>'
+            });
+          }
+          
+          if (element.businessObject.extensionElements) {
+            var extensionElements = element.businessObject.extensionElements.values;
+            for (var j = 0; j < extensionElements.length; j++) {
+              console.log(extensionElements[j]);
+              if (extensionElements[j].$type == 'camunda:executionListener') {
+                if (extensionElements[j].event == 'end') {
+                  overlays.add(element.id, 'note', {
+                    position: {
+                      bottom: 0,
+                      right: 0
+                    },
+                    html: '<div class="execution-listener">' + extensionElements[j].expression + '</div>'
+                  });
+                }
+                if (extensionElements[j].event == 'start') {
+                  overlays.add(element.id, 'note', {
+                    position: {
+                      bottom: 0,
+                      left: 0
+                    },
+                    html: '<div class="execution-listener">' + extensionElements[j].expression + '</div>'
+                  });
+                }
+              }
+            }
+          }
+ 
+ 		  if (element.type == 'bpmn:SequenceFlow' && element.businessObject.conditionExpression) {
+ 		      var position = {
+                      left: 0
+                    }
+              if (element.waypoints[0].y > element.waypoints[element.waypoints.length - 1].y) {
+              	position.top = -29;
+              } else {
+                position.bottom = -3;
+              }    
+          	  overlays.add(element.id, 'note', {
+                    position: position,
+                    html: '<div class="execution-listener">' + element.businessObject.conditionExpression.body + '</div>'
+                  }); 
+		  }
+          
+          if (element.businessObject.$attrs["camunda:delegateExpression"]) {
+            overlays.add(element.id, 'note', {
+              position: {
+                bottom: -3,
+                left: 0
+              },
+              html: '<div class="execution-listener">' + element.businessObject.$attrs["camunda:delegateExpression"] + '</div>'
+            });
+          }
+          
+        }
+      }          
+			canvas.addMarker('Event_0gca3ga', 'highlight');
+			canvas.addMarker('StartEvent_1', 'highlight');
+			canvas.addMarker('first-delegate', 'highlight');
+			$("g[data-element-id='Flow_122kr5f']").find('path').attr('stroke', '#00ff00');
+			$("g[data-element-id='Flow_03m70jn']").find('path').attr('stroke', '#00ff00');
+          //YOUR ANNOTATIONS GO HERE
+
+        });
+      }
+
+
+      var diagramXML = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http:\/\/www.omg.org\/spec\/BPMN\/20100524\/MODEL\" xmlns:bpmndi=\"http:\/\/www.omg.org\/spec\/BPMN\/20100524\/DI\" xmlns:dc=\"http:\/\/www.omg.org\/spec\/DD\/20100524\/DC\" xmlns:camunda=\"http:\/\/camunda.org\/schema\/1.0\/bpmn\" xmlns:di=\"http:\/\/www.omg.org\/spec\/DD\/20100524\/DI\" xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" id=\"Definitions_18wz9va\" targetNamespace=\"http:\/\/bpmn.io\/schema\/bpmn\" exporter=\"Camunda Modeler\" exporterVersion=\"4.6.0\">\n  <bpmn:process id=\"poc_process\" name=\"poc\" isExecutable=\"true\">\n    <bpmn:startEvent id=\"StartEvent_1\">\n      <bpmn:outgoing>Flow_122kr5f<\/bpmn:outgoing>\n    <\/bpmn:startEvent>\n    <bpmn:sequenceFlow id=\"Flow_122kr5f\" sourceRef=\"StartEvent_1\" targetRef=\"first-delegate\" \/>\n    <bpmn:endEvent id=\"Event_1hno1ek\">\n      <bpmn:incoming>Flow_0j9rb8q<\/bpmn:incoming>\n    <\/bpmn:endEvent>\n    <bpmn:sequenceFlow id=\"Flow_03m70jn\" sourceRef=\"first-delegate\" targetRef=\"Event_0gca3ga\" \/>\n    <bpmn:serviceTask id=\"first-delegate\" name=\"FirstDelegate\" camunda:delegateExpression=\"${firstDelegate}\">\n      <bpmn:incoming>Flow_122kr5f<\/bpmn:incoming>\n      <bpmn:outgoing>Flow_03m70jn<\/bpmn:outgoing>\n    <\/bpmn:serviceTask>\n    <bpmn:sequenceFlow id=\"Flow_0j9rb8q\" sourceRef=\"Event_0gca3ga\" targetRef=\"Event_1hno1ek\" \/>\n    <bpmn:intermediateCatchEvent id=\"Event_0gca3ga\">\n      <bpmn:incoming>Flow_03m70jn<\/bpmn:incoming>\n      <bpmn:outgoing>Flow_0j9rb8q<\/bpmn:outgoing>\n      <bpmn:timerEventDefinition id=\"TimerEventDefinition_0g814h4\">\n        <bpmn:timeDuration xsi:type=\"bpmn:tFormalExpression\">PT1M<\/bpmn:timeDuration>\n      <\/bpmn:timerEventDefinition>\n    <\/bpmn:intermediateCatchEvent>\n  <\/bpmn:process>\n  <bpmndi:BPMNDiagram id=\"BPMNDiagram_1\">\n    <bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"poc_process\">\n      <bpmndi:BPMNEdge id=\"Flow_03m70jn_di\" bpmnElement=\"Flow_03m70jn\">\n        <di:waypoint x=\"400\" y=\"117\" \/>\n        <di:waypoint x=\"472\" y=\"117\" \/>\n      <\/bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_122kr5f_di\" bpmnElement=\"Flow_122kr5f\">\n        <di:waypoint x=\"215\" y=\"117\" \/>\n        <di:waypoint x=\"300\" y=\"117\" \/>\n      <\/bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_0j9rb8q_di\" bpmnElement=\"Flow_0j9rb8q\">\n        <di:waypoint x=\"508\" y=\"117\" \/>\n        <di:waypoint x=\"562\" y=\"117\" \/>\n      <\/bpmndi:BPMNEdge>\n      <bpmndi:BPMNShape id=\"_BPMNShape_StartEvent_2\" bpmnElement=\"StartEvent_1\">\n        <dc:Bounds x=\"179\" y=\"99\" width=\"36\" height=\"36\" \/>\n      <\/bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Event_1hno1ek_di\" bpmnElement=\"Event_1hno1ek\">\n        <dc:Bounds x=\"562\" y=\"99\" width=\"36\" height=\"36\" \/>\n      <\/bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Activity_0315nsk_di\" bpmnElement=\"first-delegate\">\n        <dc:Bounds x=\"300\" y=\"77\" width=\"100\" height=\"80\" \/>\n      <\/bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Event_1l5l821_di\" bpmnElement=\"Event_0gca3ga\">\n        <dc:Bounds x=\"472\" y=\"99\" width=\"36\" height=\"36\" \/>\n      <\/bpmndi:BPMNShape>\n    <\/bpmndi:BPMNPlane>\n  <\/bpmndi:BPMNDiagram>\n<\/bpmn:definitions>\n';
+      importXML(diagramXML);
+
+    })(window.BpmnJS, window.jQuery);
+  </script>
+</body>
+</html>

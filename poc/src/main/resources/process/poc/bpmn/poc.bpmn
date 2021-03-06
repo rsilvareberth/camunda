@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_18wz9va" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0">
-  <bpmn:process id="poc" name="poc" isExecutable="true">
+  <bpmn:process id="poc_process" name="poc" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_122kr5f</bpmn:outgoing>
     </bpmn:startEvent>
@@ -23,7 +23,7 @@
     </bpmn:intermediateCatchEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="poc">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="poc_process">
       <bpmndi:BPMNEdge id="Flow_03m70jn_di" bpmnElement="Flow_03m70jn">
         <di:waypoint x="400" y="117" />
         <di:waypoint x="472" y="117" />
