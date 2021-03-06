@@ -1,0 +1,43 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.13.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+ ext {
+        springBootVersion = '2.2.13.RELEASE'
+        camundaBPMVersion = '7.13.0'
+        springBootCamundaVersion = '7.13.0'
+        commons2LibVersion = '0.2.2-9'
+        javaLang3Version = '3.9'
+    }
+    
+group = 'wipdev.cloud'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	runtimeOnly 'com.h2database:h2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	compile('org.springframework.boot:spring-boot-starter-web')
+	
+	// Camunda
+	compile "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest:${camundaBPMVersion}"
+	compile "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp:${camundaBPMVersion}"
+	compile "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-test:7.13.0"
+	compile "org.camunda.bpm:camunda-engine-plugin-spin:${camundaBPMVersion}"
+	compile "org.camunda.spin:camunda-spin-dataformat-all:1.10.1"
+	compile "org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-test:${camundaBPMVersion}"
+	//compile "org.springframework.boot:spring-boot-starter-jdbc:*"
+	// Camunda
+}
+
+test {
+	useJUnitPlatform()
+}
